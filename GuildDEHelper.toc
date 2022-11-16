@@ -2,5 +2,7 @@
 ## Title: GuildDEHelper
 ## Notes: Helper for disenchanting items for guild bank
 
+## SavedVariablesPerCharacter: GuildDEHelper_Logging_On, GuildDEHelper_Item_Counts
+
 GuildDEHelper.lua
 GuildDEHelper.xml

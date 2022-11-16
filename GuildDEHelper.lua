@@ -7,13 +7,9 @@ function GuildDEHelper_OnLoad(self)
   self:RegisterEvent("ADDON_LOADED")
 end
 
-local logging_on = false
-
-local item_counts = { }
-
 
 local function print_all_items()
-  for item_id, count in pairs(item_counts) do
+  for item_id, count in pairs(GuildDEHelper_Item_Counts) do
     _, item_link = GetItemInfo(item_id)
     print(item_link, count)
   end
@@ -22,15 +18,23 @@ end
 
 function GuildDEHelper_OnEvent(self, event, ...)
   if event == "ADDON_LOADED" and ... == "GuildDEHelper" then
+    if GuildDEHelper_Logging_On == nil then
+      GuildDEHelper_Logging_On = false
+    end
+
+    if GuildDEHelper_Item_Counts == nil then
+      GuildDEHelper_Item_Counts = { }
+    end
+
     self:UnregisterEvent("ADDON_LOADED")
     self:RegisterEvent("CHAT_MSG_LOOT")
-  elseif event == "CHAT_MSG_LOOT" and logging_on then
+  elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
     _, _, item_id = chat_msg:find("item:(%d+).*")
     _, _, quantity = chat_msg:find("|h|rx(%d+)%.")
     if quantity == nil then quantity = 1 end
-    if item_counts[item_id] == nil then item_counts[item_id] = 0 end
-    item_counts[item_id] = item_counts[item_id] + quantity
+    if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
+    GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + quantity
 
     GuildDEHelper_AddToPanel(item_id, quantity)
   end
@@ -50,17 +54,17 @@ SlashCmdList["GUILDDEHELPER"] = function(cmd)
   if cmd == "" or cmd == "show" then
     ShowUIPanel(GuildDEHelper)
   elseif cmd == "on" then
-    logging_on = true
+    GuildDEHelper_Logging_On = true
     print("GuildDEHelper: on")
   elseif cmd == "off" then
-    logging_on = false
+    GuildDEHelper_Logging_On = false
     print("GuildDEHelper: off")
   elseif cmd == "reset" then
-    item_counts = { }
+    GuildDEHelper_Item_Counts = { }
   elseif cmd == "print" then
     print_all_items()
   elseif cmd == "status" then
-    if logging_on then print("GuildDEHelper: on") else print("GuildDEHelper: off") end
+    if GuildDEHelper_Logging_On then print("GuildDEHelper: on") else print("GuildDEHelper: off") end
   else
     print("Usage: /gdeh on|off|show|reset|print")
   end
