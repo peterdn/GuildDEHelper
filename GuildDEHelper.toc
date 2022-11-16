@@ -1,0 +1,6 @@
+## Interface: 30300
+## Title: GuildDEHelper
+## Notes: Helper for disenchanting items for guild bank
+
+GuildDEHelper.lua
+GuildDEHelper.xml
