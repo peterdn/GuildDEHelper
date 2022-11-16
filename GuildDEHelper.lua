@@ -8,6 +8,16 @@ function GuildDEHelper_OnLoad(self)
 end
 
 
+local ITEMS_TO_COUNT = {
+  ["34057"] = true, -- "Abyss Crystal"
+  ["34054"] = true, -- "Infinite Dust"
+  ["34052"] = true, -- "Dream Shard"
+  ["34055"] = true, -- "Greater Cosmic Essence"
+  ["34056"] = true, -- "Lesser Cosmic Essence"
+  -- ["7073"] = true, -- "Broken Fang"
+}
+
+
 local function print_all_items()
   for item_id, count in pairs(GuildDEHelper_Item_Counts) do
     _, item_link = GetItemInfo(item_id)
@@ -31,6 +41,11 @@ function GuildDEHelper_OnEvent(self, event, ...)
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
     _, _, item_id = chat_msg:find("item:(%d+).*")
+
+    if ITEMS_TO_COUNT[item_id] == nil then
+      return
+    end
+
     _, _, quantity = chat_msg:find("|h|rx(%d+)%.")
     if quantity == nil then quantity = 1 end
     if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
