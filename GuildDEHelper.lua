@@ -40,6 +40,11 @@ function GuildDEHelper_OnEvent(self, event, ...)
     self:RegisterEvent("CHAT_MSG_LOOT")
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
+
+    if select(5, ...) ~= UnitName("player") then
+      return
+    end
+
     _, _, item_id = chat_msg:find("item:(%d+).*")
 
     if ITEMS_TO_COUNT[item_id] == nil then
@@ -57,7 +62,6 @@ end
 
 
 function GuildDEHelper_AddToPanel(item_id, quantity)
-  print("Looted item: ", item_id, "x", quantity)
   local frame_name = "GuildDEHelper_Item_" .. item_id
   local item = CreateFrame("Frame", frame_name, GuildDEHelper, "GuildDEHelperItemTemplate")
 end
