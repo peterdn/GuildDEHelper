@@ -1,0 +1,30 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/http://wowprogramming.com/FrameXML/UI.xsd">
+  <Frame name="GuildDEHelper" parent="UIParent" toplevel="true" enableMouse="true" inherits="BackdropTemplate" hidden="true">
+    <Size x="256" y="128" />
+    <Anchors>
+      <Anchor point="CENTER" />
+    </Anchors>
+    <KeyValues>
+      <KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+      <!-- <KeyValue key="backdropBorderColor" value="LEGENDARY_ORANGE_COLOR" type="global"/>
+      <KeyValue key="backdropBorderColorAlpha" value="0.25" type="number"/> -->
+    </KeyValues>
+    <Scripts>
+      <OnLoad inherit="prepend" function="GuildDEHelper_OnLoad" />
+      <OnEvent function="GuildDEHelper_OnEvent" />
+    </Scripts>
+  </Frame>
+
+  <Frame name="GuildDEHelperItemTemplate" virtual="true">
+  <Size x="200" y="16" />
+  <Layers>
+    <Layer level="BACKGROUND">
+      <Texture name="$parentIconTexture" parentKey="icon" />
+      <FontString name="$parentItemName" parentKey="name" inherits="GameFontNormalLeft" />
+      <FontString name="$parentItemCount" parentKey="count" inherits="NumberFontNormalRight" />
+    </Layer>
+  </Layers>
+  </Frame>
+</Ui>
