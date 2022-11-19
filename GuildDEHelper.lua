@@ -1,10 +1,12 @@
 function GuildDEHelper_OnLoad(self)
-  UIPanelWindows["GuildDEHelper"] = {
-    area = "center",
-    pushable = 1,
-    whileDead = 1,
-  }
+  -- UIPanelWindows["GuildDEHelper"] = {
+  --   area = "center",
+  --   pushable = 1,
+  --   whileDead = 1,
+  --   allowOtherPanels = 1,
+  -- }
   self:RegisterEvent("ADDON_LOADED")
+  self:RegisterForDrag("LeftButton")
 end
 
 
@@ -58,6 +60,26 @@ function GuildDEHelper_OnEvent(self, event, ...)
 
     GuildDEHelper_AddToPanel(item_id, quantity)
   end
+end
+
+
+function GuildDEHelper_OnKeyDown(self, key)
+  if key == "ESCAPE" then
+    self:Hide()
+    return
+  end
+end
+
+
+function GuildDEHelper_OnDragStart(self, button)
+  if button == "LeftButton" then
+    self:StartMoving()
+  end
+end
+
+
+function GuildDEHelper_OnDragStop(self)
+  self:StopMovingOrSizing()
 end
 
 

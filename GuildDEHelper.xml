@@ -1,19 +1,20 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/http://wowprogramming.com/FrameXML/UI.xsd">
-  <Frame name="GuildDEHelper" parent="UIParent" toplevel="true" enableMouse="true" inherits="BackdropTemplate" hidden="true">
+  <Frame name="GuildDEHelper" parent="UIParent" toplevel="false" enableMouse="true" inherits="BackdropTemplate" hidden="true" movable="true">
     <Size x="256" y="128" />
     <Anchors>
       <Anchor point="CENTER" />
     </Anchors>
     <KeyValues>
       <KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
-      <!-- <KeyValue key="backdropBorderColor" value="LEGENDARY_ORANGE_COLOR" type="global"/>
-      <KeyValue key="backdropBorderColorAlpha" value="0.25" type="number"/> -->
     </KeyValues>
     <Scripts>
       <OnLoad inherit="prepend" function="GuildDEHelper_OnLoad" />
       <OnEvent function="GuildDEHelper_OnEvent" />
+      <OnkeyDown function="GuildDEHelper_OnKeyDown" />
+      <OnDragStart function="GuildDEHelper_OnDragStart" />
+      <OnDragStop function="GuildDEHelper_OnDragStop" />
     </Scripts>
   </Frame>
 
