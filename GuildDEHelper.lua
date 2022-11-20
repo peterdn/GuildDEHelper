@@ -1,10 +1,4 @@
 function GuildDEHelper_OnLoad(self)
-  -- UIPanelWindows["GuildDEHelper"] = {
-  --   area = "center",
-  --   pushable = 1,
-  --   whileDead = 1,
-  --   allowOtherPanels = 1,
-  -- }
   self:RegisterEvent("ADDON_LOADED")
   self:RegisterForDrag("LeftButton")
 end
@@ -28,6 +22,13 @@ local function print_all_items()
 end
 
 
+local function add_all_items()
+  for item_id, count in pairs(GuildDEHelper_Item_Counts) do
+    GuildDEHelper_AddToPanel(item_id, count)
+  end
+end
+
+
 function GuildDEHelper_OnEvent(self, event, ...)
   if event == "ADDON_LOADED" and ... == "GuildDEHelper" then
     if GuildDEHelper_Logging_On == nil then
@@ -40,6 +41,8 @@ function GuildDEHelper_OnEvent(self, event, ...)
 
     self:UnregisterEvent("ADDON_LOADED")
     self:RegisterEvent("CHAT_MSG_LOOT")
+
+    add_all_items()
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
 
@@ -58,7 +61,7 @@ function GuildDEHelper_OnEvent(self, event, ...)
     if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
     GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + quantity
 
-    GuildDEHelper_AddToPanel(item_id, quantity)
+    GuildDEHelper_AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
   end
 end
 
@@ -66,8 +69,10 @@ end
 function GuildDEHelper_OnKeyDown(self, key)
   if key == "ESCAPE" then
     self:Hide()
+    self:SetPropagateKeyboardInput(false)
     return
   end
+  self:SetPropagateKeyboardInput(true)
 end
 
 
@@ -83,9 +88,29 @@ function GuildDEHelper_OnDragStop(self)
 end
 
 
+local item_frames = { }
+local nitems = 0
+
+
 function GuildDEHelper_AddToPanel(item_id, quantity)
-  local frame_name = "GuildDEHelper_Item_" .. item_id
-  local item = CreateFrame("Frame", frame_name, GuildDEHelper, "GuildDEHelperItemTemplate")
+  item_name = GetItemInfo(item_id)
+  item_icon = GetItemIcon(item_id)
+  if item_frames[item_id] == nil then
+    local frame_name = "GuildDEHelper_Item_" .. item_id
+    local item_frame = CreateFrame("Frame", frame_name, GuildDEHelper, "GuildDEHelperItemTemplate")
+    item_frame.name:SetText(item_name)
+    item_frame.count:SetText(quantity)
+    item_frame.icon:SetTexture(item_icon)
+    item_frame:SetHeight(24)
+    item_frame:SetWidth(24)
+    item_frame:SetPoint("TOPLEFT", 10, -16 - 24*nitems)
+    item_frames[item_id] = item_frame
+    nitems = nitems + 1
+  else
+    item_frame = item_frames[item_id]
+    item_frame.count:SetText(quantity)
+    print("SET THE NEW QUANTITY", quantity)
+  end
 end
 
 
