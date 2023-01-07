@@ -1,9 +1,3 @@
-function GuildDEHelper_OnLoad(self)
-  self:RegisterEvent("ADDON_LOADED")
-  self:RegisterForDrag("LeftButton")
-end
-
-
 local ITEMS_TO_COUNT = {
   ["34057"] = true, -- "Abyss Crystal"
   ["34054"] = true, -- "Infinite Dust"
@@ -22,9 +16,9 @@ local function print_all_items()
 end
 
 
-local function add_all_items(self)
+local function AddAllItems(self)
   for item_id, count in pairs(GuildDEHelper_Item_Counts) do
-    GuildDEHelper_AddToPanel(self, item_id, count)
+    self:AddToPanel(item_id, count)
   end
 end
 
@@ -42,7 +36,7 @@ function GuildDEHelper_OnEvent(self, event, ...)
     self:UnregisterEvent("ADDON_LOADED")
     self:RegisterEvent("CHAT_MSG_LOOT")
 
-    add_all_items(self)
+    self:AddAllItems()
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
 
@@ -61,12 +55,12 @@ function GuildDEHelper_OnEvent(self, event, ...)
     if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
     GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + quantity
 
-    GuildDEHelper_AddToPanel(self, item_id, GuildDEHelper_Item_Counts[item_id])
+    self:AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
   elseif event == "GET_ITEM_INFO_RECEIVED" then
     item_id = tostring(select(1, ...))
 
     if ITEMS_TO_COUNT[item_id] ~= nil and GuildDEHelper_Item_Counts[item_id] > 0 then
-      GuildDEHelper_AddToPanel(self, item_id, GuildDEHelper_Item_Counts[item_id])
+      self:AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
     end
   end
 end
@@ -122,6 +116,15 @@ function GuildDEHelper_AddToPanel(self, item_id, quantity)
     item_frame.name:SetText(item_name)
     item_frame.count:SetText(quantity)
   end
+end
+
+
+function GuildDEHelper_OnLoad(self)
+  self.AddToPanel = GuildDEHelper_AddToPanel
+  self.AddAllItems = AddAllItems
+
+  self:RegisterEvent("ADDON_LOADED")
+  self:RegisterForDrag("LeftButton")
 end
 
 
