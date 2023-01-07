@@ -128,11 +128,6 @@ end
 
 
 function GuildDEHelper_OnKeyDown(self, key)
-  if key == "ESCAPE" then
-    self:Hide()
-    self:SetPropagateKeyboardInput(false)
-    return
-  end
   self:SetPropagateKeyboardInput(true)
 end
 

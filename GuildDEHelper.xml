@@ -39,6 +39,13 @@
           <OnClick function="GuildDEHelper_OnResetClick" />
         </Scripts>
       </Button>
+      <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+        <Anchors>
+          <Anchor point="TOPRIGHT">
+            <Offset x="-4" y="-4" />
+          </Anchor>
+        </Anchors>
+      </Button>
     </Frames>
   </Frame>
 
