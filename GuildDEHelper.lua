@@ -58,6 +58,7 @@ function GuildDEHelper_LayoutItems(self)
       item_icon = GetItemIcon(item_id)
 
       item_frame = item_frames[i]
+      item_frame.item_id = item_id
       item_frame.icon:SetTexture(item_icon)
       item_frame.name:SetText(item_name)
       item_frame.count:SetText(quantity)
@@ -156,6 +157,20 @@ function GuildDEHelper_OnEnableClick(self)
     GuildDEHelper_Logging_On = true
   end
   GuildDEHelper:UpdateEnableButtonText()
+end
+
+
+function GuildDEHelper_OnItemIncrClick(self)
+  item_id = self:GetParent().item_id
+  GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + 1
+  GuildDEHelper:LayoutItems()
+end
+
+
+function GuildDEHelper_OnItemDecrClick(self)
+  item_id = self:GetParent().item_id
+  GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] - 1
+  GuildDEHelper:LayoutItems()
 end
 
 
