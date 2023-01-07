@@ -22,9 +22,9 @@ local function print_all_items()
 end
 
 
-local function add_all_items()
+local function add_all_items(self)
   for item_id, count in pairs(GuildDEHelper_Item_Counts) do
-    GuildDEHelper_AddToPanel(item_id, count)
+    GuildDEHelper_AddToPanel(self, item_id, count)
   end
 end
 
@@ -42,7 +42,7 @@ function GuildDEHelper_OnEvent(self, event, ...)
     self:UnregisterEvent("ADDON_LOADED")
     self:RegisterEvent("CHAT_MSG_LOOT")
 
-    add_all_items()
+    add_all_items(self)
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
 
@@ -61,7 +61,13 @@ function GuildDEHelper_OnEvent(self, event, ...)
     if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
     GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + quantity
 
-    GuildDEHelper_AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
+    GuildDEHelper_AddToPanel(self, item_id, GuildDEHelper_Item_Counts[item_id])
+  elseif event == "GET_ITEM_INFO_RECEIVED" then
+    item_id = tostring(select(1, ...))
+
+    if ITEMS_TO_COUNT[item_id] ~= nil and GuildDEHelper_Item_Counts[item_id] > 0 then
+      GuildDEHelper_AddToPanel(self, item_id, GuildDEHelper_Item_Counts[item_id])
+    end
   end
 end
 
@@ -92,8 +98,13 @@ local item_frames = { }
 local nitems = 0
 
 
-function GuildDEHelper_AddToPanel(item_id, quantity)
+function GuildDEHelper_AddToPanel(self, item_id, quantity)
   item_name = GetItemInfo(item_id)
+  if item_name == nil then
+    self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    item_name = "?"
+  end
+
   item_icon = GetItemIcon(item_id)
   if item_frames[item_id] == nil then
     local frame_name = "GuildDEHelper_Item_" .. item_id
@@ -108,8 +119,8 @@ function GuildDEHelper_AddToPanel(item_id, quantity)
     nitems = nitems + 1
   else
     item_frame = item_frames[item_id]
+    item_frame.name:SetText(item_name)
     item_frame.count:SetText(quantity)
-    print("SET THE NEW QUANTITY", quantity)
   end
 end
 
