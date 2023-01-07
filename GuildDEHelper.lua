@@ -16,9 +16,68 @@ local function print_all_items()
 end
 
 
-local function AddAllItems(self)
-  for item_id, count in pairs(GuildDEHelper_Item_Counts) do
-    self:AddToPanel(item_id, count)
+local item_frames = { }
+
+
+function GuildDEHelper_CreateItemFrames(self)
+  for i = 1, 4 do
+    local frame_name = "GuildDEHelper_Item_" .. i
+    local item_frame = CreateFrame("Frame", frame_name, GuildDEHelper, "GuildDEHelperItemTemplate")
+
+    item_frame:SetHeight(24)
+    item_frame:SetWidth(24)
+    item_frame:SetPoint("TOPLEFT", 10, -16 - 24*i)
+    item_frames[i] = item_frame
+  end
+end
+
+
+function GuildDEHelper_LayoutItems(self)
+  i = 1
+  items = { }
+  for item_id, quantity in pairs(GuildDEHelper_Item_Counts) do
+    if quantity > 0 then
+      items[i] = { ["item_id"] = item_id, ["quantity"] = quantity }
+      i = i + 1
+    end
+  end
+
+  for i = 1, 4 do
+    if items[i] == nil then
+      item_frames[i]:Hide()
+    else
+      item_id = items[i].item_id
+      quantity = items[i].quantity
+
+      item_name = GetItemInfo(item_id)
+      if item_name == nil then
+        self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+        item_name = "?"
+      end
+
+      item_icon = GetItemIcon(item_id)
+
+      item_frame = item_frames[i]
+      item_frame.icon:SetTexture(item_icon)
+      item_frame.name:SetText(item_name)
+      item_frame.count:SetText(quantity)
+      item_frame:Show()
+    end
+  end
+end
+
+
+function GuildDEHelper_ResetItems(self)
+  GuildDEHelper_Item_Counts = { }
+  self:LayoutItems()
+end
+
+
+function GuildDEHelper_UpdateEnableButtonText(self)
+  if GuildDEHelper_Logging_On then
+    self.enable_button:SetText("Disable")
+  else
+    self.enable_button:SetText("Enable")
   end
 end
 
@@ -28,6 +87,7 @@ function GuildDEHelper_OnEvent(self, event, ...)
     if GuildDEHelper_Logging_On == nil then
       GuildDEHelper_Logging_On = false
     end
+    self:UpdateEnableButtonText()
 
     if GuildDEHelper_Item_Counts == nil then
       GuildDEHelper_Item_Counts = { }
@@ -36,7 +96,8 @@ function GuildDEHelper_OnEvent(self, event, ...)
     self:UnregisterEvent("ADDON_LOADED")
     self:RegisterEvent("CHAT_MSG_LOOT")
 
-    self:AddAllItems()
+    self:CreateItemFrames()
+    self:LayoutItems()
   elseif event == "CHAT_MSG_LOOT" and GuildDEHelper_Logging_On then
     chat_msg = select(1, ...)
 
@@ -55,12 +116,12 @@ function GuildDEHelper_OnEvent(self, event, ...)
     if GuildDEHelper_Item_Counts[item_id] == nil then GuildDEHelper_Item_Counts[item_id] = 0 end
     GuildDEHelper_Item_Counts[item_id] = GuildDEHelper_Item_Counts[item_id] + quantity
 
-    self:AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
+    self:LayoutItems()
   elseif event == "GET_ITEM_INFO_RECEIVED" then
     item_id = tostring(select(1, ...))
 
     if ITEMS_TO_COUNT[item_id] ~= nil and GuildDEHelper_Item_Counts[item_id] > 0 then
-      self:AddToPanel(item_id, GuildDEHelper_Item_Counts[item_id])
+      self:LayoutItems()
     end
   end
 end
@@ -88,40 +149,26 @@ function GuildDEHelper_OnDragStop(self)
 end
 
 
-local item_frames = { }
-local nitems = 0
+function GuildDEHelper_OnResetClick(self)
+  GuildDEHelper:ResetItems()
+end
 
 
-function GuildDEHelper_AddToPanel(self, item_id, quantity)
-  item_name = GetItemInfo(item_id)
-  if item_name == nil then
-    self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-    item_name = "?"
-  end
-
-  item_icon = GetItemIcon(item_id)
-  if item_frames[item_id] == nil then
-    local frame_name = "GuildDEHelper_Item_" .. item_id
-    local item_frame = CreateFrame("Frame", frame_name, GuildDEHelper, "GuildDEHelperItemTemplate")
-    item_frame.name:SetText(item_name)
-    item_frame.count:SetText(quantity)
-    item_frame.icon:SetTexture(item_icon)
-    item_frame:SetHeight(24)
-    item_frame:SetWidth(24)
-    item_frame:SetPoint("TOPLEFT", 10, -16 - 24*nitems)
-    item_frames[item_id] = item_frame
-    nitems = nitems + 1
+function GuildDEHelper_OnEnableClick(self)
+  if GuildDEHelper_Logging_On then
+    GuildDEHelper_Logging_On = false
   else
-    item_frame = item_frames[item_id]
-    item_frame.name:SetText(item_name)
-    item_frame.count:SetText(quantity)
+    GuildDEHelper_Logging_On = true
   end
+  GuildDEHelper:UpdateEnableButtonText()
 end
 
 
 function GuildDEHelper_OnLoad(self)
-  self.AddToPanel = GuildDEHelper_AddToPanel
-  self.AddAllItems = AddAllItems
+  self.CreateItemFrames = GuildDEHelper_CreateItemFrames
+  self.LayoutItems = GuildDEHelper_LayoutItems
+  self.ResetItems = GuildDEHelper_ResetItems
+  self.UpdateEnableButtonText = GuildDEHelper_UpdateEnableButtonText
 
   self:RegisterEvent("ADDON_LOADED")
   self:RegisterForDrag("LeftButton")
@@ -136,11 +183,13 @@ SlashCmdList["GUILDDEHELPER"] = function(cmd)
   elseif cmd == "on" then
     GuildDEHelper_Logging_On = true
     print("GuildDEHelper: on")
+    GuildDEHelper:UpdateEnableButtonText()
   elseif cmd == "off" then
     GuildDEHelper_Logging_On = false
     print("GuildDEHelper: off")
+    GuildDEHelper:UpdateEnableButtonText()
   elseif cmd == "reset" then
-    GuildDEHelper_Item_Counts = { }
+    GuildDEHelper:ResetItems()
   elseif cmd == "print" then
     print_all_items()
   elseif cmd == "status" then
